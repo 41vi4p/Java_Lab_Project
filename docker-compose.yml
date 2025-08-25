@@ -1,0 +1,34 @@
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: ecs_course_db
+    environment:
+      POSTGRES_DB: ecs_courses
+      POSTGRES_USER: ecs_admin
+      POSTGRES_PASSWORD: ecs_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  # Optional: pgAdmin for database administration
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: ecs_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@ecs.edu
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  pgadmin_data:
