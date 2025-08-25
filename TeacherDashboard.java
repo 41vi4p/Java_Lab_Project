@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
 import java.util.List;
 
 public class TeacherDashboard extends Frame implements ActionListener {
@@ -29,6 +28,20 @@ public class TeacherDashboard extends Frame implements ActionListener {
     private static final String MAIN_VIEW = "main";
     private static final String COURSE_EDIT_VIEW = "edit";
     
+    // Red-Orange Professional Color Scheme
+    private static final Color PRIMARY_COLOR = new Color(220, 38, 127);     // Deep Pink-Red
+    private static final Color PRIMARY_DARK = new Color(190, 18, 60);       // Dark Red
+    private static final Color SECONDARY_COLOR = new Color(254, 242, 242);   // Soft Pink Background
+    private static final Color ACCENT_COLOR = new Color(34, 197, 94);       // Fresh Green (contrast)
+    private static final Color WARNING_COLOR = new Color(251, 146, 60);     // Warm Orange
+    private static final Color DANGER_COLOR = new Color(239, 68, 68);       // Bright Red
+    private static final Color TEXT_COLOR = new Color(69, 10, 10);          // Dark Red-Brown
+    private static final Color BACKGROUND_COLOR = new Color(255, 247, 237);  // Warm Cream-Orange
+    private static final Color CARD_COLOR = new Color(254, 251, 249);       // Soft White-Pink
+    private static final Color BORDER_COLOR = new Color(254, 215, 170);     // Soft Orange Border
+    private static final Color HEADER_COLOR = new Color(194, 65, 12);       // Red-Orange Header
+    private static final Color INPUT_FOCUS_COLOR = new Color(254, 240, 138); // Light Orange Focus
+    
     public TeacherDashboard(Teacher teacher) {
         this.currentTeacher = teacher;
         this.courseManager = CourseManager.getInstance();
@@ -38,9 +51,11 @@ public class TeacherDashboard extends Frame implements ActionListener {
         setupLayout();
         setupEventHandlers();
         
-        setTitle("ECS Teacher Dashboard - " + teacher.getName());
+        setTitle("👩‍🏫 ECS Teacher Dashboard - " + teacher.getName());
         setSize(1400, 900);
         setResizable(true);
+        setLocationRelativeTo(null);
+        setBackground(BACKGROUND_COLOR);
         
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
@@ -54,31 +69,32 @@ public class TeacherDashboard extends Frame implements ActionListener {
     private void initializeComponents() {
         cardLayout = new CardLayout();
         mainPanel = new Panel(cardLayout);
+        mainPanel.setBackground(BACKGROUND_COLOR);
         
-        studentsList = new java.awt.List(15, false);
-        coursesList = new java.awt.List(15, false);
-        enrollmentsList = new java.awt.List(10, false);
+        studentsList = createStyledList(15);
+        coursesList = createStyledList(15);
+        enrollmentsList = createStyledList(10);
         
-        studentDetailsArea = new TextArea(10, 40);
+        studentDetailsArea = createStyledTextArea(10, 40);
         studentDetailsArea.setEditable(false);
         
-        courseDetailsArea = new TextArea(8, 40);
+        courseDetailsArea = createStyledTextArea(8, 40);
         courseDetailsArea.setEditable(false);
         
-        viewStudentsButton = new Button("View All Students");
-        manageCourseButton = new Button("Manage Courses");
-        logoutButton = new Button("Logout");
-        editCourseButton = new Button("Edit Selected Course");
-        addCourseButton = new Button("Add New Course");
-        deleteCourseButton = new Button("Delete Selected Course");
-        refreshButton = new Button("Refresh Data");
+        viewStudentsButton = createStyledButton("👥 View All Students", PRIMARY_COLOR, Color.WHITE);
+        manageCourseButton = createStyledButton("📚 Manage Courses", PRIMARY_COLOR, Color.WHITE);
+        logoutButton = createStyledButton("💪 Logout", DANGER_COLOR, Color.WHITE);
+        editCourseButton = createStyledButton("✏️ Edit Course", WARNING_COLOR, Color.WHITE);
+        addCourseButton = createStyledButton("➕ Add Course", ACCENT_COLOR, Color.WHITE);
+        deleteCourseButton = createStyledButton("❌ Delete Course", DANGER_COLOR, Color.WHITE);
+        refreshButton = createStyledButton("🔄 Refresh", PRIMARY_DARK, Color.WHITE);
         
-        // Course editing components
-        courseIdField = new TextField(15);
-        courseNameField = new TextField(30);
-        creditsField = new TextField(5);
-        instructorField = new TextField(25);
-        maxStudentsField = new TextField(5);
+        // Course editing components with styling
+        courseIdField = createStyledTextField(15);
+        courseNameField = createStyledTextField(30);
+        creditsField = createStyledTextField(5);
+        instructorField = createStyledTextField(25);
+        maxStudentsField = createStyledTextField(5);
         
         courseTypeChoice = new Choice();
         courseTypeChoice.add("Core");
@@ -87,14 +103,15 @@ public class TeacherDashboard extends Frame implements ActionListener {
         courseTypeChoice.add("Open Elective");
         courseTypeChoice.add("MDM");
         
-        prerequisitesArea = new TextArea(3, 30);
-        descriptionArea = new TextArea(4, 30);
+        prerequisitesArea = createStyledTextArea(3, 30);
+        descriptionArea = createStyledTextArea(4, 30);
         
-        saveCourseButton = new Button("Save Course");
-        cancelEditButton = new Button("Cancel");
+        saveCourseButton = createStyledButton("✓ Save Course", ACCENT_COLOR, Color.WHITE);
+        cancelEditButton = createStyledButton("❌ Cancel", WARNING_COLOR, Color.WHITE);
         
-        statusLabel = new Label("Status: Ready", Label.CENTER);
-        statusLabel.setBackground(Color.LIGHT_GRAY);
+        statusLabel = createStyledLabel("Status: Ready");
+        statusLabel.setBackground(BORDER_COLOR);
+        statusLabel.setForeground(TEXT_COLOR);
     }
     
     private void setupLayout() {
@@ -112,57 +129,84 @@ public class TeacherDashboard extends Frame implements ActionListener {
     
     private Panel createMainView() {
         Panel panel = new Panel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
         
-        // Header panel
+        // Header panel with enhanced styling
         Panel headerPanel = new Panel(new FlowLayout());
-        Label titleLabel = new Label("Teacher Dashboard - " + currentTeacher.getName(), Label.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.setBackground(HEADER_COLOR);
+        Label titleLabel = new Label("👩‍🏫 Teacher Dashboard - " + currentTeacher.getName(), Label.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setForeground(Color.WHITE);
         headerPanel.add(titleLabel);
         panel.add(headerPanel, BorderLayout.NORTH);
         
         // Main content panel
         Panel contentPanel = new Panel(new BorderLayout());
+        contentPanel.setBackground(BACKGROUND_COLOR);
         
-        // Left side - Students and Enrollments
-        Panel leftPanel = new Panel(new BorderLayout());
-        leftPanel.add(new Label("All Students", Label.CENTER), BorderLayout.NORTH);
+        // Left side - Students and Enrollments with styled panels
+        Panel leftPanel = createStyledSectionPanel();
+        Label studentsLabel = new Label("👥 All Students", Label.CENTER);
+        studentsLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        studentsLabel.setForeground(PRIMARY_DARK);
+        studentsLabel.setBackground(SECONDARY_COLOR);
+        leftPanel.add(studentsLabel, BorderLayout.NORTH);
         leftPanel.add(studentsList, BorderLayout.CENTER);
         
         Panel leftButtonPanel = new Panel(new FlowLayout());
+        leftButtonPanel.setBackground(CARD_COLOR);
         leftButtonPanel.add(viewStudentsButton);
         leftPanel.add(leftButtonPanel, BorderLayout.SOUTH);
         
-        // Center - Course Management
-        Panel centerPanel = new Panel(new BorderLayout());
-        centerPanel.add(new Label("All Courses", Label.CENTER), BorderLayout.NORTH);
+        // Center - Course Management with styling
+        Panel centerPanel = createStyledSectionPanel();
+        Label coursesLabel = new Label("📚 All Courses", Label.CENTER);
+        coursesLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        coursesLabel.setForeground(PRIMARY_DARK);
+        coursesLabel.setBackground(SECONDARY_COLOR);
+        centerPanel.add(coursesLabel, BorderLayout.NORTH);
         centerPanel.add(coursesList, BorderLayout.CENTER);
         
         Panel centerButtonPanel = new Panel(new GridLayout(2, 2, 5, 5));
+        centerButtonPanel.setBackground(CARD_COLOR);
         centerButtonPanel.add(editCourseButton);
         centerButtonPanel.add(addCourseButton);
         centerButtonPanel.add(deleteCourseButton);
         centerButtonPanel.add(refreshButton);
         centerPanel.add(centerButtonPanel, BorderLayout.SOUTH);
         
-        // Right side - Details and Enrollments
-        Panel rightPanel = new Panel(new BorderLayout());
+        // Right side - Details and Enrollments with styling
+        Panel rightPanel = createStyledSectionPanel();
         
         Panel detailsPanel = new Panel(new GridLayout(2, 1, 5, 5));
+        detailsPanel.setBackground(CARD_COLOR);
         
-        Panel studentDetailPanel = new Panel(new BorderLayout());
-        studentDetailPanel.add(new Label("Student Details", Label.CENTER), BorderLayout.NORTH);
+        Panel studentDetailPanel = createStyledSectionPanel();
+        Label studentDetailLabel = new Label("👤 Student Details", Label.CENTER);
+        studentDetailLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        studentDetailLabel.setForeground(PRIMARY_DARK);
+        studentDetailLabel.setBackground(SECONDARY_COLOR);
+        studentDetailPanel.add(studentDetailLabel, BorderLayout.NORTH);
         studentDetailPanel.add(studentDetailsArea, BorderLayout.CENTER);
         detailsPanel.add(studentDetailPanel);
         
-        Panel courseDetailPanel = new Panel(new BorderLayout());
-        courseDetailPanel.add(new Label("Course Details", Label.CENTER), BorderLayout.NORTH);
+        Panel courseDetailPanel = createStyledSectionPanel();
+        Label courseDetailLabel = new Label("📋 Course Details", Label.CENTER);
+        courseDetailLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        courseDetailLabel.setForeground(PRIMARY_DARK);
+        courseDetailLabel.setBackground(SECONDARY_COLOR);
+        courseDetailPanel.add(courseDetailLabel, BorderLayout.NORTH);
         courseDetailPanel.add(courseDetailsArea, BorderLayout.CENTER);
         detailsPanel.add(courseDetailPanel);
         
         rightPanel.add(detailsPanel, BorderLayout.CENTER);
         
-        Panel enrollmentPanel = new Panel(new BorderLayout());
-        enrollmentPanel.add(new Label("Course Enrollments", Label.CENTER), BorderLayout.NORTH);
+        Panel enrollmentPanel = createStyledSectionPanel();
+        Label enrollmentLabel = new Label("📝 Course Enrollments", Label.CENTER);
+        enrollmentLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        enrollmentLabel.setForeground(PRIMARY_DARK);
+        enrollmentLabel.setBackground(SECONDARY_COLOR);
+        enrollmentPanel.add(enrollmentLabel, BorderLayout.NORTH);
         enrollmentPanel.add(enrollmentsList, BorderLayout.CENTER);
         rightPanel.add(enrollmentPanel, BorderLayout.SOUTH);
         
@@ -172,8 +216,9 @@ public class TeacherDashboard extends Frame implements ActionListener {
         
         panel.add(contentPanel, BorderLayout.CENTER);
         
-        // Bottom button panel
+        // Bottom button panel with styling
         Panel bottomPanel = new Panel(new FlowLayout());
+        bottomPanel.setBackground(BORDER_COLOR);
         bottomPanel.add(logoutButton);
         panel.add(bottomPanel, BorderLayout.SOUTH);
         
@@ -182,61 +227,82 @@ public class TeacherDashboard extends Frame implements ActionListener {
     
     private Panel createCourseEditView() {
         Panel panel = new Panel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
         
         Panel headerPanel = new Panel(new FlowLayout());
-        Label titleLabel = new Label("Course Management", Label.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.setBackground(HEADER_COLOR);
+        Label titleLabel = new Label("📚 Course Management", Label.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setForeground(Color.WHITE);
         headerPanel.add(titleLabel);
         panel.add(headerPanel, BorderLayout.NORTH);
         
         Panel formPanel = new Panel(new GridBagLayout());
+        formPanel.setBackground(CARD_COLOR);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.anchor = GridBagConstraints.WEST;
         
         gbc.gridx = 0; gbc.gridy = 0;
-        formPanel.add(new Label("Course ID:"), gbc);
+        Label courseIdLabel = createStyledLabel("Course ID:");
+        courseIdLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formPanel.add(courseIdLabel, gbc);
         gbc.gridx = 1;
         formPanel.add(courseIdField, gbc);
         
         gbc.gridx = 0; gbc.gridy = 1;
-        formPanel.add(new Label("Course Name:"), gbc);
+        Label courseNameLabel = createStyledLabel("Course Name:");
+        courseNameLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formPanel.add(courseNameLabel, gbc);
         gbc.gridx = 1;
         formPanel.add(courseNameField, gbc);
         
         gbc.gridx = 0; gbc.gridy = 2;
-        formPanel.add(new Label("Credits:"), gbc);
+        Label creditsLabel = createStyledLabel("Credits:");
+        creditsLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formPanel.add(creditsLabel, gbc);
         gbc.gridx = 1;
         formPanel.add(creditsField, gbc);
         
         gbc.gridx = 0; gbc.gridy = 3;
-        formPanel.add(new Label("Course Type:"), gbc);
+        Label courseTypeLabel = createStyledLabel("Course Type:");
+        courseTypeLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formPanel.add(courseTypeLabel, gbc);
         gbc.gridx = 1;
         formPanel.add(courseTypeChoice, gbc);
         
         gbc.gridx = 0; gbc.gridy = 4;
-        formPanel.add(new Label("Instructor:"), gbc);
+        Label instructorLabel = createStyledLabel("Instructor:");
+        instructorLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formPanel.add(instructorLabel, gbc);
         gbc.gridx = 1;
         formPanel.add(instructorField, gbc);
         
         gbc.gridx = 0; gbc.gridy = 5;
-        formPanel.add(new Label("Max Students:"), gbc);
+        Label maxStudentsLabel = createStyledLabel("Max Students:");
+        maxStudentsLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formPanel.add(maxStudentsLabel, gbc);
         gbc.gridx = 1;
         formPanel.add(maxStudentsField, gbc);
         
         gbc.gridx = 0; gbc.gridy = 6;
-        formPanel.add(new Label("Prerequisites:"), gbc);
+        Label prerequisitesLabel = createStyledLabel("Prerequisites:");
+        prerequisitesLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formPanel.add(prerequisitesLabel, gbc);
         gbc.gridx = 1;
         formPanel.add(prerequisitesArea, gbc);
         
         gbc.gridx = 0; gbc.gridy = 7;
-        formPanel.add(new Label("Description:"), gbc);
+        Label descriptionLabel = createStyledLabel("Description:");
+        descriptionLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formPanel.add(descriptionLabel, gbc);
         gbc.gridx = 1;
         formPanel.add(descriptionArea, gbc);
         
         panel.add(formPanel, BorderLayout.CENTER);
         
         Panel buttonPanel = new Panel(new FlowLayout());
+        buttonPanel.setBackground(BORDER_COLOR);
         buttonPanel.add(saveCourseButton);
         buttonPanel.add(cancelEditButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -505,5 +571,96 @@ public class TeacherDashboard extends Frame implements ActionListener {
         confirmDialog.setSize(300, 120);
         confirmDialog.setLocationRelativeTo(this);
         confirmDialog.setVisible(true);
+    }
+    
+    // Helper methods to create styled components
+    private TextField createStyledTextField(int columns) {
+        TextField field = new TextField(columns);
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        field.setBackground(Color.WHITE);
+        field.setForeground(TEXT_COLOR);
+        
+        // Add focus listener for better visual feedback
+        field.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                field.setBackground(INPUT_FOCUS_COLOR);
+            }
+            public void focusLost(FocusEvent e) {
+                field.setBackground(Color.WHITE);
+            }
+        });
+        
+        return field;
+    }
+    
+    private Button createStyledButton(String text, Color bgColor, Color textColor) {
+        Button button = new Button(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(bgColor);
+        button.setForeground(textColor);
+        
+        // Add mouse listeners for hover effects (visual feedback)
+        button.addMouseListener(new MouseAdapter() {
+            Color originalColor = bgColor;
+            
+            public void mouseEntered(MouseEvent e) {
+                // Create darker shade for hover
+                int r = Math.max(0, originalColor.getRed() - 20);
+                int g = Math.max(0, originalColor.getGreen() - 20);
+                int b = Math.max(0, originalColor.getBlue() - 20);
+                button.setBackground(new Color(r, g, b));
+            }
+            
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(originalColor);
+            }
+            
+            public void mousePressed(MouseEvent e) {
+                // Even darker when pressed
+                int r = Math.max(0, originalColor.getRed() - 40);
+                int g = Math.max(0, originalColor.getGreen() - 40);
+                int b = Math.max(0, originalColor.getBlue() - 40);
+                button.setBackground(new Color(r, g, b));
+            }
+            
+            public void mouseReleased(MouseEvent e) {
+                // Back to hover color
+                int r = Math.max(0, originalColor.getRed() - 20);
+                int g = Math.max(0, originalColor.getGreen() - 20);
+                int b = Math.max(0, originalColor.getBlue() - 20);
+                button.setBackground(new Color(r, g, b));
+            }
+        });
+        
+        return button;
+    }
+    
+    private java.awt.List createStyledList(int rows) {
+        java.awt.List list = new java.awt.List(rows, false);
+        list.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        list.setBackground(Color.WHITE);
+        list.setForeground(TEXT_COLOR);
+        return list;
+    }
+    
+    private Label createStyledLabel(String text) {
+        Label label = new Label(text);
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        label.setForeground(TEXT_COLOR);
+        return label;
+    }
+    
+    private TextArea createStyledTextArea(int rows, int cols) {
+        TextArea area = new TextArea(rows, cols);
+        area.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        area.setBackground(Color.WHITE);
+        area.setForeground(TEXT_COLOR);
+        return area;
+    }
+    
+    private Panel createStyledSectionPanel() {
+        Panel panel = new Panel(new BorderLayout());
+        panel.setBackground(CARD_COLOR);
+        return panel;
     }
 }

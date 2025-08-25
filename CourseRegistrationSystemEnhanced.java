@@ -2,7 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class CourseRegistrationSystem extends Frame implements ActionListener {
+public class CourseRegistrationSystemEnhanced extends Frame implements ActionListener {
     private CourseManager courseManager;
     private Student currentStudent;
     
@@ -19,7 +19,7 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
     private static final String LOGIN_PANEL = "login";
     private static final String REGISTRATION_PANEL = "registration";
     
-    // Red-Orange Professional Color Scheme
+    // Red-Orange Professional Color Scheme (Consistent with main system)
     private static final Color PRIMARY_COLOR = new Color(220, 38, 127);     // Deep Pink-Red
     private static final Color PRIMARY_DARK = new Color(190, 18, 60);       // Dark Red
     private static final Color SECONDARY_COLOR = new Color(254, 242, 242);   // Soft Pink Background
@@ -36,7 +36,7 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
     private static final Color WARNING_BG = new Color(255, 237, 213);       // Light Orange Background
     private static final Color ERROR_BG = new Color(254, 226, 226);         // Light Red Background
 
-    public CourseRegistrationSystem() {
+    public CourseRegistrationSystemEnhanced() {
         courseManager = CourseManager.getInstance();
         initializeComponents();
         setupLayout();
@@ -50,11 +50,7 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
-                try {
-                    courseManager.saveData("course_data.txt");
-                } catch (Exception e) {
-                    System.err.println("Error saving data: " + e.getMessage());
-                }
+                courseManager.saveData("course_data.txt");
                 System.exit(0);
             }
         });
@@ -73,13 +69,13 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         maxCreditsField = createStyledTextField(5);
         maxCreditsField.setText("18");
         
-        // Create styled buttons with red-orange theme colors
+        // Create styled buttons with colors
         loginButton = createStyledButton("Student Login", PRIMARY_COLOR, Color.WHITE);
         registerStudentButton = createStyledButton("Register New Student", ACCENT_COLOR, Color.WHITE);
         teacherLoginButton = createStyledButton("Teacher Login", PRIMARY_DARK, Color.WHITE);
-        refreshButton = createStyledButton("Refresh Courses", new Color(251, 146, 60), Color.WHITE);
+        refreshButton = createStyledButton("Refresh Courses", SECONDARY_COLOR, TEXT_COLOR);
         saveButton = createStyledButton("Save Data", ACCENT_COLOR, Color.WHITE);
-        logoutButton = createStyledButton("Logout", new Color(239, 68, 68), Color.WHITE);
+        logoutButton = createStyledButton("Logout", WARNING_COLOR, Color.WHITE);
         
         teacherUsernameField = createStyledTextField(15);
         teacherPasswordField = createStyledTextField(15);
@@ -93,18 +89,18 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         mdmList = createStyledList();
         registeredList = createStyledList();
         
-        // Create styled action buttons with red-orange theme
-        addCoreButton = createStyledButton("Add Core", new Color(220, 38, 127), Color.WHITE);
-        addPECButton = createStyledButton("Add PEC", new Color(220, 38, 127), Color.WHITE);
-        addHonoursButton = createStyledButton("Add Honours", new Color(220, 38, 127), Color.WHITE);
-        addOpenButton = createStyledButton("Add Open Elective", new Color(220, 38, 127), Color.WHITE);
-        addMDMButton = createStyledButton("Add MDM", new Color(220, 38, 127), Color.WHITE);
-        dropButton = createStyledButton("Drop Course", new Color(239, 68, 68), Color.WHITE);
+        // Create styled action buttons
+        addCoreButton = createStyledButton("Add Core", PRIMARY_COLOR, Color.WHITE);
+        addPECButton = createStyledButton("Add PEC", PRIMARY_COLOR, Color.WHITE);
+        addHonoursButton = createStyledButton("Add Honours", PRIMARY_COLOR, Color.WHITE);
+        addOpenButton = createStyledButton("Add Open Elective", PRIMARY_COLOR, Color.WHITE);
+        addMDMButton = createStyledButton("Add MDM", PRIMARY_COLOR, Color.WHITE);
+        dropButton = createStyledButton("Drop Course", DANGER_COLOR, Color.WHITE);
         
         // Create styled labels
         creditsLabel = createStyledLabel("Credits: 0/18");
-        creditsLabel.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        creditsLabel.setForeground(PRIMARY_DARK);
+        creditsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        creditsLabel.setForeground(PRIMARY_COLOR);
         
         statusLabel = createStyledLabel("Status: Please login or register");
         statusLabel.setForeground(TEXT_COLOR);
@@ -112,8 +108,8 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         // Create styled text area
         courseDetailsArea = new TextArea(6, 40);
         courseDetailsArea.setEditable(false);
-        courseDetailsArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        courseDetailsArea.setBackground(new Color(255, 245, 238));
+        courseDetailsArea.setFont(new Font("Arial", Font.PLAIN, 12));
+        courseDetailsArea.setBackground(SECONDARY_COLOR);
         courseDetailsArea.setForeground(TEXT_COLOR);
         
         refreshCourseLists();
@@ -122,68 +118,23 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
     // Helper methods to create styled components
     private TextField createStyledTextField(int columns) {
         TextField field = new TextField(columns);
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        field.setFont(new Font("Arial", Font.PLAIN, 14));
         field.setBackground(Color.WHITE);
         field.setForeground(TEXT_COLOR);
-        
-        // Add focus listener for better visual feedback
-        field.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                field.setBackground(INPUT_FOCUS_COLOR);
-            }
-            public void focusLost(FocusEvent e) {
-                field.setBackground(Color.WHITE);
-            }
-        });
-        
         return field;
     }
     
     private Button createStyledButton(String text, Color bgColor, Color textColor) {
         Button button = new Button(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFont(new Font("Arial", Font.BOLD, 12));
         button.setBackground(bgColor);
         button.setForeground(textColor);
-        
-        // Add mouse listeners for hover effects (visual feedback)
-        button.addMouseListener(new MouseAdapter() {
-            Color originalColor = bgColor;
-            
-            public void mouseEntered(MouseEvent e) {
-                // Create darker shade for hover
-                int r = Math.max(0, originalColor.getRed() - 20);
-                int g = Math.max(0, originalColor.getGreen() - 20);
-                int b = Math.max(0, originalColor.getBlue() - 20);
-                button.setBackground(new Color(r, g, b));
-            }
-            
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(originalColor);
-            }
-            
-            public void mousePressed(MouseEvent e) {
-                // Even darker when pressed
-                int r = Math.max(0, originalColor.getRed() - 40);
-                int g = Math.max(0, originalColor.getGreen() - 40);
-                int b = Math.max(0, originalColor.getBlue() - 40);
-                button.setBackground(new Color(r, g, b));
-            }
-            
-            public void mouseReleased(MouseEvent e) {
-                // Back to hover color
-                int r = Math.max(0, originalColor.getRed() - 20);
-                int g = Math.max(0, originalColor.getGreen() - 20);
-                int b = Math.max(0, originalColor.getBlue() - 20);
-                button.setBackground(new Color(r, g, b));
-            }
-        });
-        
         return button;
     }
     
     private java.awt.List createStyledList() {
         java.awt.List list = new java.awt.List(6, false);
-        list.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        list.setFont(new Font("Arial", Font.PLAIN, 12));
         list.setBackground(Color.WHITE);
         list.setForeground(TEXT_COLOR);
         return list;
@@ -191,7 +142,7 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
     
     private Label createStyledLabel(String text) {
         Label label = new Label(text);
-        label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        label.setFont(new Font("Arial", Font.PLAIN, 12));
         label.setForeground(TEXT_COLOR);
         return label;
     }
@@ -211,16 +162,10 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         
         add(mainPanel, BorderLayout.CENTER);
         
-        // Create modern status bar with red-orange gradient effect
+        // Create modern status bar
         Panel statusPanel = new Panel(new FlowLayout(FlowLayout.LEFT));
-        statusPanel.setBackground(new Color(254, 215, 170));
-        
-        // Add padding to status label
-        Panel statusContainer = new Panel(new FlowLayout());
-        statusContainer.setBackground(new Color(254, 215, 170));
-        statusContainer.add(statusLabel);
-        statusPanel.add(statusContainer);
-        
+        statusPanel.setBackground(SECONDARY_COLOR);
+        statusPanel.add(statusLabel);
         add(statusPanel, BorderLayout.SOUTH);
         
         cardLayout.show(mainPanel, LOGIN_PANEL);
@@ -234,8 +179,8 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         Panel titlePanel = new Panel(new FlowLayout());
         titlePanel.setBackground(BACKGROUND_COLOR);
         
-        Label titleLabel = new Label("🎓 ECS Course Registration System", Label.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        Label titleLabel = new Label("ECS Course Registration System", Label.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setForeground(PRIMARY_COLOR);
         titlePanel.add(titleLabel);
         panel.add(titlePanel, BorderLayout.NORTH);
@@ -247,8 +192,8 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         Panel studentPanel = createStyledPanel();
         studentPanel.setLayout(new BorderLayout());
         
-        Label studentTitleLabel = new Label("👨‍🎓 Student Login", Label.CENTER);
-        studentTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        Label studentTitleLabel = new Label("Student Login", Label.CENTER);
+        studentTitleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         studentTitleLabel.setForeground(PRIMARY_COLOR);
         studentPanel.add(studentTitleLabel, BorderLayout.NORTH);
         
@@ -307,8 +252,8 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         Panel teacherPanel = createStyledPanel();
         teacherPanel.setLayout(new BorderLayout());
         
-        Label teacherTitleLabel = new Label("👩‍🏫 Teacher Login", Label.CENTER);
-        teacherTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        Label teacherTitleLabel = new Label("Teacher Login", Label.CENTER);
+        teacherTitleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         teacherTitleLabel.setForeground(PRIMARY_COLOR);
         teacherPanel.add(teacherTitleLabel, BorderLayout.NORTH);
         
@@ -345,9 +290,9 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
                               "Username: admin\n" +
                               "Password: admin123\n\n" );
         credentialsInfo.setEditable(false);
-        credentialsInfo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        credentialsInfo.setBackground(new Color(255, 245, 238));
-        credentialsInfo.setForeground(new Color(154, 52, 18));
+        credentialsInfo.setFont(new Font("Arial", Font.PLAIN, 11));
+        credentialsInfo.setBackground(SECONDARY_COLOR);
+        credentialsInfo.setForeground(TEXT_COLOR);
         
         tgbc.gridx = 0; tgbc.gridy = 3;
         tgbc.gridwidth = 2;
@@ -373,8 +318,8 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         Panel studentInfoPanel = new Panel(new FlowLayout(FlowLayout.LEFT));
         studentInfoPanel.setBackground(BACKGROUND_COLOR);
         Label studentInfoLabel = new Label();
-        studentInfoLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        studentInfoLabel.setForeground(PRIMARY_DARK);
+        studentInfoLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        studentInfoLabel.setForeground(TEXT_COLOR);
         studentInfoPanel.add(studentInfoLabel);
         headerPanel.add(studentInfoPanel, BorderLayout.WEST);
         
@@ -413,9 +358,9 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         Panel detailsPanel = new Panel(new BorderLayout());
         detailsPanel.setBackground(CARD_COLOR);
         
-        Label detailsTitle = new Label("📋 Course Details:", Label.LEFT);
-        detailsTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        detailsTitle.setForeground(PRIMARY_DARK);
+        Label detailsTitle = new Label("Course Details:", Label.LEFT);
+        detailsTitle.setFont(new Font("Arial", Font.BOLD, 14));
+        detailsTitle.setForeground(TEXT_COLOR);
         detailsPanel.add(detailsTitle, BorderLayout.NORTH);
         detailsPanel.add(courseDetailsArea, BorderLayout.CENTER);
         
@@ -436,10 +381,9 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
         panel.setLayout(new BorderLayout());
         
         Label titleLabel = new Label(title, Label.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setBackground(HEADER_COLOR);
-        // titleLabel.setOpaque(true); // Not available in AWT Label
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        titleLabel.setForeground(TEXT_COLOR);
+        titleLabel.setBackground(SECONDARY_COLOR);
         panel.add(titleLabel, BorderLayout.NORTH);
         
         // Add some padding around the list
@@ -837,6 +781,6 @@ public class CourseRegistrationSystem extends Frame implements ActionListener {
     }
     
     public static void main(String[] args) {
-        new CourseRegistrationSystem().setVisible(true);
+        new CourseRegistrationSystemEnhanced().setVisible(true);
     }
 }
