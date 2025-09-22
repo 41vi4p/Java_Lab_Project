@@ -1,33 +1,35 @@
+import javax.swing.*;
+import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 
-public class TeacherDashboard extends Frame implements ActionListener {
+public class TeacherDashboard extends JFrame implements ActionListener {
     private Teacher currentTeacher;
     private CourseManager courseManager;
     private TeacherDAO teacherDAO;
-    
-    private Panel mainPanel;
+
+    private JPanel mainPanel;
     private CardLayout cardLayout;
-    
+
     // Components for different views
-    private java.awt.List studentsList, coursesList, enrollmentsList;
-    private TextArea studentDetailsArea, courseDetailsArea;
-    private Button viewStudentsButton, manageCourseButton, logoutButton;
-    private Button editCourseButton, addCourseButton, deleteCourseButton;
-    private Button refreshButton;
-    
+    private JList<String> studentsList, coursesList, enrollmentsList;
+    private JTextArea studentDetailsArea, courseDetailsArea;
+    private JButton viewStudentsButton, manageCourseButton, logoutButton;
+    private JButton editCourseButton, addCourseButton, deleteCourseButton;
+    private JButton refreshButton;
+
     // Course editing components
-    private TextField courseIdField, courseNameField, creditsField, instructorField, maxStudentsField;
-    private Choice courseTypeChoice;
-    private TextArea prerequisitesArea, descriptionArea;
-    private Button saveCourseButton, cancelEditButton;
-    
-    private Label statusLabel;
-    
+    private JTextField courseIdField, courseNameField, creditsField, instructorField, maxStudentsField;
+    private JComboBox<String> courseTypeChoice;
+    private JTextArea prerequisitesArea, descriptionArea;
+    private JButton saveCourseButton, cancelEditButton;
+
+    private JLabel statusLabel;
+
     private static final String MAIN_VIEW = "main";
     private static final String COURSE_EDIT_VIEW = "edit";
-    
+
     // Red-Orange Professional Color Scheme
     private static final Color PRIMARY_COLOR = new Color(220, 38, 127);     // Deep Pink-Red
     private static final Color PRIMARY_DARK = new Color(190, 18, 60);       // Dark Red
@@ -41,275 +43,387 @@ public class TeacherDashboard extends Frame implements ActionListener {
     private static final Color BORDER_COLOR = new Color(254, 215, 170);     // Soft Orange Border
     private static final Color HEADER_COLOR = new Color(194, 65, 12);       // Red-Orange Header
     private static final Color INPUT_FOCUS_COLOR = new Color(254, 240, 138); // Light Orange Focus
-    
+
     public TeacherDashboard(Teacher teacher) {
         this.currentTeacher = teacher;
         this.courseManager = CourseManager.getInstance();
         this.teacherDAO = new TeacherDAO();
-        
+
         initializeComponents();
         setupLayout();
         setupEventHandlers();
-        
+
         setTitle("👩‍🏫 ECS Teacher Dashboard - " + teacher.getName());
         setSize(1400, 900);
         setResizable(true);
         setLocationRelativeTo(null);
         setBackground(BACKGROUND_COLOR);
-        
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 System.exit(0);
             }
         });
-        
+
         refreshData();
     }
-    
+
     private void initializeComponents() {
         cardLayout = new CardLayout();
-        mainPanel = new Panel(cardLayout);
+        mainPanel = new JPanel(cardLayout);
         mainPanel.setBackground(BACKGROUND_COLOR);
-        
-        studentsList = createStyledList(15);
-        coursesList = createStyledList(15);
-        enrollmentsList = createStyledList(10);
-        
+
+        studentsList = createStyledList();
+        coursesList = createStyledList();
+        enrollmentsList = createStyledList();
+
         studentDetailsArea = createStyledTextArea(10, 40);
         studentDetailsArea.setEditable(false);
-        
+
         courseDetailsArea = createStyledTextArea(8, 40);
         courseDetailsArea.setEditable(false);
-        
+
         viewStudentsButton = createStyledButton("👥 View All Students", PRIMARY_COLOR, Color.WHITE);
         manageCourseButton = createStyledButton("📚 Manage Courses", PRIMARY_COLOR, Color.WHITE);
-        logoutButton = createStyledButton("💪 Logout", DANGER_COLOR, Color.WHITE);
+        logoutButton = createStyledButton("🚪 Logout", DANGER_COLOR, Color.WHITE);
         editCourseButton = createStyledButton("✏️ Edit Course", WARNING_COLOR, Color.WHITE);
         addCourseButton = createStyledButton("➕ Add Course", ACCENT_COLOR, Color.WHITE);
         deleteCourseButton = createStyledButton("❌ Delete Course", DANGER_COLOR, Color.WHITE);
         refreshButton = createStyledButton("🔄 Refresh", PRIMARY_DARK, Color.WHITE);
-        
+
         // Course editing components with styling
         courseIdField = createStyledTextField(15);
         courseNameField = createStyledTextField(30);
         creditsField = createStyledTextField(5);
         instructorField = createStyledTextField(25);
         maxStudentsField = createStyledTextField(5);
-        
-        courseTypeChoice = new Choice();
-        courseTypeChoice.add("Core");
-        courseTypeChoice.add("PEC");
-        courseTypeChoice.add("Honours");
-        courseTypeChoice.add("Open Elective");
-        courseTypeChoice.add("MDM");
-        
-        prerequisitesArea = createStyledTextArea(3, 30);
-        descriptionArea = createStyledTextArea(4, 30);
-        
-        saveCourseButton = createStyledButton("✓ Save Course", ACCENT_COLOR, Color.WHITE);
+
+        courseTypeChoice = new JComboBox<>();
+        courseTypeChoice.addItem("Core");
+        courseTypeChoice.addItem("PEC");
+        courseTypeChoice.addItem("Honours");
+        courseTypeChoice.addItem("Open Elective");
+        courseTypeChoice.addItem("MDM");
+        courseTypeChoice.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        courseTypeChoice.setBackground(Color.WHITE);
+        courseTypeChoice.setForeground(TEXT_COLOR);
+
+        prerequisitesArea = createStyledTextArea(4, 25);
+        descriptionArea = createStyledTextArea(6, 25);
+
+        saveCourseButton = createStyledButton("💾 Save Course", ACCENT_COLOR, Color.WHITE);
         cancelEditButton = createStyledButton("❌ Cancel", WARNING_COLOR, Color.WHITE);
-        
+
         statusLabel = createStyledLabel("Status: Ready");
-        statusLabel.setBackground(BORDER_COLOR);
+        statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         statusLabel.setForeground(TEXT_COLOR);
     }
-    
-    private void setupLayout() {
-        Panel mainView = createMainView();
-        Panel editView = createCourseEditView();
-        
-        mainPanel.add(mainView, MAIN_VIEW);
-        mainPanel.add(editView, COURSE_EDIT_VIEW);
-        
-        add(mainPanel, BorderLayout.CENTER);
-        add(statusLabel, BorderLayout.SOUTH);
-        
-        cardLayout.show(mainPanel, MAIN_VIEW);
+
+    // Helper methods to create styled components
+    private JTextField createStyledTextField(int columns) {
+        JTextField field = new JTextField(columns);
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        field.setBackground(Color.WHITE);
+        field.setForeground(TEXT_COLOR);
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 1),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+
+        // Add focus listener for better visual feedback
+        field.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                field.setBackground(INPUT_FOCUS_COLOR);
+            }
+            public void focusLost(FocusEvent e) {
+                field.setBackground(Color.WHITE);
+            }
+        });
+
+        return field;
     }
-    
-    private Panel createMainView() {
-        Panel panel = new Panel(new BorderLayout());
-        panel.setBackground(BACKGROUND_COLOR);
-        
-        // Header panel with enhanced styling
-        Panel headerPanel = new Panel(new FlowLayout());
-        headerPanel.setBackground(HEADER_COLOR);
-        Label titleLabel = new Label("👩‍🏫 Teacher Dashboard - " + currentTeacher.getName(), Label.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titleLabel.setForeground(Color.WHITE);
-        headerPanel.add(titleLabel);
-        panel.add(headerPanel, BorderLayout.NORTH);
-        
-        // Main content panel
-        Panel contentPanel = new Panel(new BorderLayout());
-        contentPanel.setBackground(BACKGROUND_COLOR);
-        
-        // Left side - Students and Enrollments with styled panels
-        Panel leftPanel = createStyledSectionPanel();
-        Label studentsLabel = new Label("👥 All Students", Label.CENTER);
-        studentsLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        studentsLabel.setForeground(PRIMARY_DARK);
-        studentsLabel.setBackground(SECONDARY_COLOR);
-        leftPanel.add(studentsLabel, BorderLayout.NORTH);
-        leftPanel.add(studentsList, BorderLayout.CENTER);
-        
-        Panel leftButtonPanel = new Panel(new FlowLayout());
-        leftButtonPanel.setBackground(CARD_COLOR);
-        leftButtonPanel.add(viewStudentsButton);
-        leftPanel.add(leftButtonPanel, BorderLayout.SOUTH);
-        
-        // Center - Course Management with styling
-        Panel centerPanel = createStyledSectionPanel();
-        Label coursesLabel = new Label("📚 All Courses", Label.CENTER);
-        coursesLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        coursesLabel.setForeground(PRIMARY_DARK);
-        coursesLabel.setBackground(SECONDARY_COLOR);
-        centerPanel.add(coursesLabel, BorderLayout.NORTH);
-        centerPanel.add(coursesList, BorderLayout.CENTER);
-        
-        Panel centerButtonPanel = new Panel(new GridLayout(2, 2, 5, 5));
-        centerButtonPanel.setBackground(CARD_COLOR);
-        centerButtonPanel.add(editCourseButton);
-        centerButtonPanel.add(addCourseButton);
-        centerButtonPanel.add(deleteCourseButton);
-        centerButtonPanel.add(refreshButton);
-        centerPanel.add(centerButtonPanel, BorderLayout.SOUTH);
-        
-        // Right side - Details and Enrollments with styling
-        Panel rightPanel = createStyledSectionPanel();
-        
-        Panel detailsPanel = new Panel(new GridLayout(2, 1, 5, 5));
-        detailsPanel.setBackground(CARD_COLOR);
-        
-        Panel studentDetailPanel = createStyledSectionPanel();
-        Label studentDetailLabel = new Label("👤 Student Details", Label.CENTER);
-        studentDetailLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        studentDetailLabel.setForeground(PRIMARY_DARK);
-        studentDetailLabel.setBackground(SECONDARY_COLOR);
-        studentDetailPanel.add(studentDetailLabel, BorderLayout.NORTH);
-        studentDetailPanel.add(studentDetailsArea, BorderLayout.CENTER);
-        detailsPanel.add(studentDetailPanel);
-        
-        Panel courseDetailPanel = createStyledSectionPanel();
-        Label courseDetailLabel = new Label("📋 Course Details", Label.CENTER);
-        courseDetailLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        courseDetailLabel.setForeground(PRIMARY_DARK);
-        courseDetailLabel.setBackground(SECONDARY_COLOR);
-        courseDetailPanel.add(courseDetailLabel, BorderLayout.NORTH);
-        courseDetailPanel.add(courseDetailsArea, BorderLayout.CENTER);
-        detailsPanel.add(courseDetailPanel);
-        
-        rightPanel.add(detailsPanel, BorderLayout.CENTER);
-        
-        Panel enrollmentPanel = createStyledSectionPanel();
-        Label enrollmentLabel = new Label("📝 Course Enrollments", Label.CENTER);
-        enrollmentLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        enrollmentLabel.setForeground(PRIMARY_DARK);
-        enrollmentLabel.setBackground(SECONDARY_COLOR);
-        enrollmentPanel.add(enrollmentLabel, BorderLayout.NORTH);
-        enrollmentPanel.add(enrollmentsList, BorderLayout.CENTER);
-        rightPanel.add(enrollmentPanel, BorderLayout.SOUTH);
-        
-        contentPanel.add(leftPanel, BorderLayout.WEST);
-        contentPanel.add(centerPanel, BorderLayout.CENTER);
-        contentPanel.add(rightPanel, BorderLayout.EAST);
-        
-        panel.add(contentPanel, BorderLayout.CENTER);
-        
-        // Bottom button panel with styling
-        Panel bottomPanel = new Panel(new FlowLayout());
-        bottomPanel.setBackground(BORDER_COLOR);
-        bottomPanel.add(logoutButton);
-        panel.add(bottomPanel, BorderLayout.SOUTH);
-        
+
+    private JButton createStyledButton(String text, Color bgColor, Color textColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        button.setBackground(bgColor);
+        button.setForeground(textColor);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+
+        // Add mouse listeners for hover effects
+        button.addMouseListener(new MouseAdapter() {
+            Color originalColor = bgColor;
+
+            public void mouseEntered(MouseEvent e) {
+                int r = Math.max(0, originalColor.getRed() - 20);
+                int g = Math.max(0, originalColor.getGreen() - 20);
+                int b = Math.max(0, originalColor.getBlue() - 20);
+                button.setBackground(new Color(r, g, b));
+            }
+
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(originalColor);
+            }
+        });
+
+        return button;
+    }
+
+    private JList<String> createStyledList() {
+        JList<String> list = new JList<>(new DefaultListModel<>());
+        list.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        list.setBackground(Color.WHITE);
+        list.setForeground(TEXT_COLOR);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        return list;
+    }
+
+    private JTextArea createStyledTextArea(int rows, int columns) {
+        JTextArea area = new JTextArea(rows, columns);
+        area.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        area.setBackground(Color.WHITE);
+        area.setForeground(TEXT_COLOR);
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        area.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        return area;
+    }
+
+    private JLabel createStyledLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        label.setForeground(TEXT_COLOR);
+        return label;
+    }
+
+    private JPanel createStyledPanel() {
+        JPanel panel = new JPanel();
+        panel.setBackground(CARD_COLOR);
         return panel;
     }
-    
-    private Panel createCourseEditView() {
-        Panel panel = new Panel(new BorderLayout());
+
+    private void setupLayout() {
+        JPanel mainViewPanel = createMainViewPanel();
+        JPanel editViewPanel = createEditViewPanel();
+
+        mainPanel.add(mainViewPanel, MAIN_VIEW);
+        mainPanel.add(editViewPanel, COURSE_EDIT_VIEW);
+
+        add(mainPanel, BorderLayout.CENTER);
+
+        // Status bar
+        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        statusPanel.setBackground(SECONDARY_COLOR);
+        statusPanel.add(statusLabel);
+        add(statusPanel, BorderLayout.SOUTH);
+
+        cardLayout.show(mainPanel, MAIN_VIEW);
+    }
+
+    private JPanel createMainViewPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);
-        
-        Panel headerPanel = new Panel(new FlowLayout());
-        headerPanel.setBackground(HEADER_COLOR);
-        Label titleLabel = new Label("📚 Course Management", Label.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titleLabel.setForeground(Color.WHITE);
-        headerPanel.add(titleLabel);
+
+        // Header with title and main action buttons
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(BACKGROUND_COLOR);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel titleLabel = new JLabel("📚 Teacher Dashboard", JLabel.LEFT);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(PRIMARY_COLOR);
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setBackground(BACKGROUND_COLOR);
+        buttonPanel.add(refreshButton);
+        buttonPanel.add(logoutButton);
+        headerPanel.add(buttonPanel, BorderLayout.EAST);
+
         panel.add(headerPanel, BorderLayout.NORTH);
-        
-        Panel formPanel = new Panel(new GridBagLayout());
-        formPanel.setBackground(CARD_COLOR);
+
+        // Main content with tabs simulation
+        JPanel contentPanel = new JPanel(new GridLayout(1, 3, 10, 10));
+        contentPanel.setBackground(BACKGROUND_COLOR);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Students Panel
+        JPanel studentsPanel = createStyledPanel();
+        studentsPanel.setLayout(new BorderLayout());
+        studentsPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 2),
+            "👥 Students Overview",
+            TitledBorder.LEFT,
+            TitledBorder.TOP,
+            new Font("Segoe UI", Font.BOLD, 14),
+            PRIMARY_COLOR
+        ));
+
+        JScrollPane studentsScrollPane = new JScrollPane(studentsList);
+        studentsScrollPane.setPreferredSize(new Dimension(300, 250));
+        studentsPanel.add(studentsScrollPane, BorderLayout.CENTER);
+
+        JPanel studentsButtonPanel = new JPanel(new FlowLayout());
+        studentsButtonPanel.setBackground(CARD_COLOR);
+        studentsButtonPanel.add(viewStudentsButton);
+        studentsPanel.add(studentsButtonPanel, BorderLayout.SOUTH);
+
+        contentPanel.add(studentsPanel);
+
+        // Courses Panel
+        JPanel coursesPanel = createStyledPanel();
+        coursesPanel.setLayout(new BorderLayout());
+        coursesPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 2),
+            "📚 Course Management",
+            TitledBorder.LEFT,
+            TitledBorder.TOP,
+            new Font("Segoe UI", Font.BOLD, 14),
+            PRIMARY_COLOR
+        ));
+
+        JScrollPane coursesScrollPane = new JScrollPane(coursesList);
+        coursesScrollPane.setPreferredSize(new Dimension(300, 250));
+        coursesPanel.add(coursesScrollPane, BorderLayout.CENTER);
+
+        JPanel coursesButtonPanel = new JPanel(new FlowLayout());
+        coursesButtonPanel.setBackground(CARD_COLOR);
+        coursesButtonPanel.add(addCourseButton);
+        coursesButtonPanel.add(editCourseButton);
+        coursesButtonPanel.add(deleteCourseButton);
+        coursesPanel.add(coursesButtonPanel, BorderLayout.SOUTH);
+
+        contentPanel.add(coursesPanel);
+
+        // Details Panel
+        JPanel detailsPanel = createStyledPanel();
+        detailsPanel.setLayout(new BorderLayout());
+        detailsPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 2),
+            "📋 Details View",
+            TitledBorder.LEFT,
+            TitledBorder.TOP,
+            new Font("Segoe UI", Font.BOLD, 14),
+            PRIMARY_COLOR
+        ));
+
+        JTabbedPane detailsTabs = new JTabbedPane();
+        detailsTabs.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+
+        JScrollPane studentDetailsScrollPane = new JScrollPane(studentDetailsArea);
+        detailsTabs.addTab("👤 Student Details", studentDetailsScrollPane);
+
+        JScrollPane courseDetailsScrollPane = new JScrollPane(courseDetailsArea);
+        detailsTabs.addTab("📖 Course Details", courseDetailsScrollPane);
+
+        JScrollPane enrollmentsScrollPane = new JScrollPane(enrollmentsList);
+        detailsTabs.addTab("👥 Enrollments", enrollmentsScrollPane);
+
+        detailsPanel.add(detailsTabs, BorderLayout.CENTER);
+
+        contentPanel.add(detailsPanel);
+
+        panel.add(contentPanel, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    private JPanel createEditViewPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+
+        // Header
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(BACKGROUND_COLOR);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel titleLabel = new JLabel("✏️ Course Editor", JLabel.LEFT);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(PRIMARY_COLOR);
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Form panel
+        JPanel formPanel = createStyledPanel();
+        formPanel.setLayout(new GridBagLayout());
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.anchor = GridBagConstraints.WEST;
-        
+
+        // Course ID
         gbc.gridx = 0; gbc.gridy = 0;
-        Label courseIdLabel = createStyledLabel("Course ID:");
-        courseIdLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        formPanel.add(courseIdLabel, gbc);
+        formPanel.add(createStyledLabel("Course ID:"), gbc);
         gbc.gridx = 1;
         formPanel.add(courseIdField, gbc);
-        
+
+        // Course Name
         gbc.gridx = 0; gbc.gridy = 1;
-        Label courseNameLabel = createStyledLabel("Course Name:");
-        courseNameLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        formPanel.add(courseNameLabel, gbc);
+        formPanel.add(createStyledLabel("Course Name:"), gbc);
         gbc.gridx = 1;
         formPanel.add(courseNameField, gbc);
-        
+
+        // Credits
         gbc.gridx = 0; gbc.gridy = 2;
-        Label creditsLabel = createStyledLabel("Credits:");
-        creditsLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        formPanel.add(creditsLabel, gbc);
+        formPanel.add(createStyledLabel("Credits:"), gbc);
         gbc.gridx = 1;
         formPanel.add(creditsField, gbc);
-        
+
+        // Instructor
         gbc.gridx = 0; gbc.gridy = 3;
-        Label courseTypeLabel = createStyledLabel("Course Type:");
-        courseTypeLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        formPanel.add(courseTypeLabel, gbc);
-        gbc.gridx = 1;
-        formPanel.add(courseTypeChoice, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 4;
-        Label instructorLabel = createStyledLabel("Instructor:");
-        instructorLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        formPanel.add(instructorLabel, gbc);
+        formPanel.add(createStyledLabel("Instructor:"), gbc);
         gbc.gridx = 1;
         formPanel.add(instructorField, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 5;
-        Label maxStudentsLabel = createStyledLabel("Max Students:");
-        maxStudentsLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        formPanel.add(maxStudentsLabel, gbc);
+
+        // Max Students
+        gbc.gridx = 0; gbc.gridy = 4;
+        formPanel.add(createStyledLabel("Max Students:"), gbc);
         gbc.gridx = 1;
         formPanel.add(maxStudentsField, gbc);
-        
+
+        // Course Type
+        gbc.gridx = 0; gbc.gridy = 5;
+        formPanel.add(createStyledLabel("Course Type:"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(courseTypeChoice, gbc);
+
+        // Prerequisites
         gbc.gridx = 0; gbc.gridy = 6;
-        Label prerequisitesLabel = createStyledLabel("Prerequisites:");
-        prerequisitesLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        formPanel.add(prerequisitesLabel, gbc);
+        formPanel.add(createStyledLabel("Prerequisites:"), gbc);
         gbc.gridx = 1;
-        formPanel.add(prerequisitesArea, gbc);
-        
+        JScrollPane prereqScrollPane = new JScrollPane(prerequisitesArea);
+        prereqScrollPane.setPreferredSize(new Dimension(300, 80));
+        formPanel.add(prereqScrollPane, gbc);
+
+        // Description
         gbc.gridx = 0; gbc.gridy = 7;
-        Label descriptionLabel = createStyledLabel("Description:");
-        descriptionLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        formPanel.add(descriptionLabel, gbc);
+        formPanel.add(createStyledLabel("Description:"), gbc);
         gbc.gridx = 1;
-        formPanel.add(descriptionArea, gbc);
-        
-        panel.add(formPanel, BorderLayout.CENTER);
-        
-        Panel buttonPanel = new Panel(new FlowLayout());
-        buttonPanel.setBackground(BORDER_COLOR);
+        JScrollPane descScrollPane = new JScrollPane(descriptionArea);
+        descScrollPane.setPreferredSize(new Dimension(300, 120));
+        formPanel.add(descScrollPane, gbc);
+
+        // Buttons
+        gbc.gridx = 0; gbc.gridy = 8;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.setBackground(CARD_COLOR);
         buttonPanel.add(saveCourseButton);
         buttonPanel.add(cancelEditButton);
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-        
+        formPanel.add(buttonPanel, gbc);
+
+        panel.add(formPanel, BorderLayout.CENTER);
+
         return panel;
     }
-    
+
     private void setupEventHandlers() {
         viewStudentsButton.addActionListener(this);
         manageCourseButton.addActionListener(this);
@@ -320,347 +434,300 @@ public class TeacherDashboard extends Frame implements ActionListener {
         refreshButton.addActionListener(this);
         saveCourseButton.addActionListener(this);
         cancelEditButton.addActionListener(this);
-        
-        studentsList.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    showStudentDetails();
+
+        // Add selection listeners for lists
+        studentsList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                String selected = studentsList.getSelectedValue();
+                if (selected != null) {
+                    showStudentDetails(selected);
                 }
             }
         });
-        
-        coursesList.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    showCourseDetails();
-                    showCourseEnrollments();
+
+        coursesList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                String selected = coursesList.getSelectedValue();
+                if (selected != null) {
+                    showCourseDetails(selected);
+                    showEnrollments(selected);
                 }
             }
         });
     }
-    
+
     public void actionPerformed(ActionEvent e) {
         String command = e.getActionCommand();
-        
+
         switch (command) {
-            case "View All Students":
+            case "👥 View All Students":
                 refreshStudentsList();
                 break;
-            case "Manage Courses":
+            case "📚 Manage Courses":
                 refreshCoursesList();
                 break;
-            case "Edit Selected Course":
+            case "🚪 Logout":
+                logout();
+                break;
+            case "✏️ Edit Course":
                 editSelectedCourse();
                 break;
-            case "Add New Course":
+            case "➕ Add Course":
                 addNewCourse();
                 break;
-            case "Delete Selected Course":
+            case "❌ Delete Course":
                 deleteSelectedCourse();
                 break;
-            case "Refresh Data":
+            case "🔄 Refresh":
                 refreshData();
                 break;
-            case "Save Course":
+            case "💾 Save Course":
                 saveCourse();
                 break;
-            case "Cancel":
-                cardLayout.show(mainPanel, MAIN_VIEW);
-                break;
-            case "Logout":
-                dispose();
-                new CourseRegistrationSystem().setVisible(true);
+            case "❌ Cancel":
+                cancelEdit();
                 break;
         }
     }
-    
+
     private void refreshData() {
         refreshStudentsList();
         refreshCoursesList();
         statusLabel.setText("Status: Data refreshed");
+        statusLabel.setForeground(ACCENT_COLOR);
     }
-    
+
     private void refreshStudentsList() {
-        studentsList.removeAll();
-        List<Student> students = courseManager.getAllStudents();
-        for (Student student : students) {
-            studentsList.add(student.toString());
+        DefaultListModel<String> model = (DefaultListModel<String>) studentsList.getModel();
+        model.clear();
+
+        try {
+            List<Student> students = courseManager.getAllStudents();
+            for (Student student : students) {
+                model.addElement(student.getStudentId() + " - " + student.getName());
+            }
+            statusLabel.setText("Status: Students list updated (" + students.size() + " students)");
+            statusLabel.setForeground(ACCENT_COLOR);
+        } catch (Exception ex) {
+            statusLabel.setText("Status: Error loading students - " + ex.getMessage());
+            statusLabel.setForeground(DANGER_COLOR);
         }
-        statusLabel.setText("Status: " + students.size() + " students loaded");
     }
-    
+
     private void refreshCoursesList() {
-        coursesList.removeAll();
-        List<Course> courses = courseManager.getAllCourses();
-        for (Course course : courses) {
-            coursesList.add(course.toString());
+        DefaultListModel<String> model = (DefaultListModel<String>) coursesList.getModel();
+        model.clear();
+
+        try {
+            List<Course> courses = courseManager.getAllCourses();
+            for (Course course : courses) {
+                model.addElement(course.getCourseId() + " - " + course.getCourseName());
+            }
+            statusLabel.setText("Status: Courses list updated (" + courses.size() + " courses)");
+            statusLabel.setForeground(ACCENT_COLOR);
+        } catch (Exception ex) {
+            statusLabel.setText("Status: Error loading courses - " + ex.getMessage());
+            statusLabel.setForeground(DANGER_COLOR);
         }
-        statusLabel.setText("Status: " + courses.size() + " courses loaded");
     }
-    
-    private void showStudentDetails() {
-        String selectedItem = studentsList.getSelectedItem();
-        if (selectedItem != null) {
-            String studentId = selectedItem.split(" - ")[0];
+
+    private void showStudentDetails(String selectedItem) {
+        String studentId = selectedItem.split(" - ")[0];
+        try {
             Student student = courseManager.getStudentById(studentId);
             if (student != null) {
                 StringBuilder details = new StringBuilder();
-                details.append("Student ID: ").append(student.getStudentId()).append("\n");
-                details.append("Name: ").append(student.getName()).append("\n");
-                details.append("Email: ").append(student.getEmail()).append("\n");
-                details.append("Semester: ").append(student.getSemester()).append("\n");
-                details.append("Max Credits: ").append(student.getMaxCredits()).append("\n");
-                details.append("Current Credits: ").append(student.getCurrentCredits()).append("\n");
-                details.append("\nRegistered Courses:\n");
+                details.append("Student ID: ").append(student.getStudentId()).append("\\n");
+                details.append("Name: ").append(student.getName()).append("\\n");
+                details.append("Email: ").append(student.getEmail()).append("\\n");
+                details.append("Semester: ").append(student.getSemester()).append("\\n");
+                details.append("Max Credits: ").append(student.getMaxCredits()).append("\\n");
+                details.append("Current Credits: ").append(student.getCurrentCredits()).append("\\n\\n");
+                details.append("Registered Courses:\\n");
                 for (Course course : student.getRegisteredCourses()) {
-                    details.append("- ").append(course.toString()).append("\n");
+                    details.append("- ").append(course.getCourseId()).append(": ").append(course.getCourseName()).append("\\n");
                 }
                 studentDetailsArea.setText(details.toString());
             }
+        } catch (Exception ex) {
+            studentDetailsArea.setText("Error loading student details: " + ex.getMessage());
         }
     }
-    
-    private void showCourseDetails() {
-        String selectedItem = coursesList.getSelectedItem();
-        if (selectedItem != null) {
-            String courseId = selectedItem.split(" - ")[0];
+
+    private void showCourseDetails(String selectedItem) {
+        String courseId = selectedItem.split(" - ")[0];
+        try {
             Course course = courseManager.getCourseById(courseId);
             if (course != null) {
                 courseDetailsArea.setText(course.getDetailedInfo());
             }
+        } catch (Exception ex) {
+            courseDetailsArea.setText("Error loading course details: " + ex.getMessage());
         }
     }
-    
-    private void showCourseEnrollments() {
-        enrollmentsList.removeAll();
-        String selectedItem = coursesList.getSelectedItem();
-        if (selectedItem != null) {
-            String courseId = selectedItem.split(" - ")[0];
+
+    private void showEnrollments(String selectedItem) {
+        String courseId = selectedItem.split(" - ")[0];
+        DefaultListModel<String> model = (DefaultListModel<String>) enrollmentsList.getModel();
+        model.clear();
+
+        try {
             List<Student> enrolledStudents = courseManager.getStudentsInCourse(courseId);
             for (Student student : enrolledStudents) {
-                enrollmentsList.add(student.toString());
+                model.addElement(student.getStudentId() + " - " + student.getName());
             }
-            statusLabel.setText("Status: " + enrolledStudents.size() + " students enrolled in course");
+        } catch (Exception ex) {
+            model.addElement("Error loading enrollments: " + ex.getMessage());
         }
     }
-    
+
     private void editSelectedCourse() {
-        String selectedItem = coursesList.getSelectedItem();
-        if (selectedItem == null) {
+        String selected = coursesList.getSelectedValue();
+        if (selected == null) {
             statusLabel.setText("Status: Please select a course to edit");
+            statusLabel.setForeground(WARNING_COLOR);
             return;
         }
-        
-        String courseId = selectedItem.split(" - ")[0];
-        Course course = courseManager.getCourseById(courseId);
-        if (course != null) {
-            // Populate form fields
-            courseIdField.setText(course.getCourseId());
-            courseIdField.setEditable(false); // Don't allow editing course ID
-            courseNameField.setText(course.getCourseName());
-            creditsField.setText(String.valueOf(course.getCredits()));
-            courseTypeChoice.select(course.getType());
-            instructorField.setText(course.getInstructor());
-            maxStudentsField.setText(String.valueOf(course.getMaxStudents()));
-            
-            if (course.getPrerequisites() != null) {
-                prerequisitesArea.setText(String.join(", ", course.getPrerequisites()));
-            } else {
-                prerequisitesArea.setText("");
+
+        String courseId = selected.split(" - ")[0];
+        try {
+            Course course = courseManager.getCourseById(courseId);
+            if (course != null) {
+                populateEditForm(course);
+                cardLayout.show(mainPanel, COURSE_EDIT_VIEW);
             }
-            descriptionArea.setText("");
-            
-            cardLayout.show(mainPanel, COURSE_EDIT_VIEW);
+        } catch (Exception ex) {
+            statusLabel.setText("Status: Error loading course for editing - " + ex.getMessage());
+            statusLabel.setForeground(DANGER_COLOR);
         }
     }
-    
+
     private void addNewCourse() {
-        // Clear form fields for new course
-        courseIdField.setText("");
-        courseIdField.setEditable(true);
-        courseNameField.setText("");
-        creditsField.setText("");
-        courseTypeChoice.select(0);
-        instructorField.setText("");
-        maxStudentsField.setText("30");
-        prerequisitesArea.setText("");
-        descriptionArea.setText("");
-        
+        clearEditForm();
         cardLayout.show(mainPanel, COURSE_EDIT_VIEW);
     }
-    
+
+    private void deleteSelectedCourse() {
+        String selected = coursesList.getSelectedValue();
+        if (selected == null) {
+            statusLabel.setText("Status: Please select a course to delete");
+            statusLabel.setForeground(WARNING_COLOR);
+            return;
+        }
+
+        String courseId = selected.split(" - ")[0];
+        int confirmation = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to delete course " + courseId + "?",
+            "Confirm Deletion",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        if (confirmation == JOptionPane.YES_OPTION) {
+            try {
+                boolean deleted = courseManager.deleteCourse(courseId);
+                if (deleted) {
+                    statusLabel.setText("Status: Course " + courseId + " deleted successfully");
+                    statusLabel.setForeground(ACCENT_COLOR);
+                    refreshCoursesList();
+                } else {
+                    statusLabel.setText("Status: Failed to delete course " + courseId);
+                    statusLabel.setForeground(DANGER_COLOR);
+                }
+            } catch (Exception ex) {
+                statusLabel.setText("Status: Error deleting course - " + ex.getMessage());
+                statusLabel.setForeground(DANGER_COLOR);
+            }
+        }
+    }
+
+    private void populateEditForm(Course course) {
+        courseIdField.setText(course.getCourseId());
+        courseNameField.setText(course.getCourseName());
+        creditsField.setText(String.valueOf(course.getCredits()));
+        instructorField.setText(course.getInstructor());
+        maxStudentsField.setText(String.valueOf(course.getMaxStudents()));
+        courseTypeChoice.setSelectedItem(course.getType());
+        prerequisitesArea.setText(String.join(", ", course.getPrerequisites()));
+        descriptionArea.setText(""); // No description field in Course class
+    }
+
+    private void clearEditForm() {
+        courseIdField.setText("");
+        courseNameField.setText("");
+        creditsField.setText("");
+        instructorField.setText("");
+        maxStudentsField.setText("");
+        courseTypeChoice.setSelectedIndex(0);
+        prerequisitesArea.setText("");
+        descriptionArea.setText("");
+    }
+
     private void saveCourse() {
         try {
             String courseId = courseIdField.getText().trim();
             String courseName = courseNameField.getText().trim();
             int credits = Integer.parseInt(creditsField.getText().trim());
-            String courseType = courseTypeChoice.getSelectedItem();
             String instructor = instructorField.getText().trim();
             int maxStudents = Integer.parseInt(maxStudentsField.getText().trim());
-            
+            String courseType = (String) courseTypeChoice.getSelectedItem();
+            String prerequisites = prerequisitesArea.getText().trim();
+            String description = descriptionArea.getText().trim();
+
             if (courseId.isEmpty() || courseName.isEmpty() || instructor.isEmpty()) {
                 statusLabel.setText("Status: Please fill all required fields");
+                statusLabel.setForeground(WARNING_COLOR);
                 return;
             }
-            
-            String[] prerequisites = null;
-            String prereqText = prerequisitesArea.getText().trim();
-            if (!prereqText.isEmpty()) {
-                prerequisites = prereqText.split(",");
-                for (int i = 0; i < prerequisites.length; i++) {
-                    prerequisites[i] = prerequisites[i].trim();
+
+            String[] prereqArray = null;
+            if (!prerequisites.isEmpty()) {
+                prereqArray = prerequisites.split(",\\s*");
+                for (int i = 0; i < prereqArray.length; i++) {
+                    prereqArray[i] = prereqArray[i].trim();
                 }
             }
-            
-            Course course = new Course(courseId, courseName, credits, courseType, 
-                                     instructor, maxStudents, prerequisites);
-            
-            boolean success;
-            if (courseIdField.isEditable()) {
-                // Adding new course
-                success = courseManager.addCourse(course);
-                statusLabel.setText(success ? "Status: Course added successfully" : "Status: Failed to add course");
-            } else {
-                // Updating existing course
-                success = courseManager.updateCourse(course);
-                statusLabel.setText(success ? "Status: Course updated successfully" : "Status: Failed to update course");
-            }
-            
-            if (success) {
+
+            Course course = new Course(courseId, courseName, credits, courseType, instructor, maxStudents, prereqArray);
+            // Note: Description is not saved as Course class doesn't have this field
+
+            boolean saved = courseManager.addCourse(course);
+            if (saved) {
+                statusLabel.setText("Status: Course saved successfully");
+                statusLabel.setForeground(ACCENT_COLOR);
                 cardLayout.show(mainPanel, MAIN_VIEW);
                 refreshCoursesList();
+            } else {
+                statusLabel.setText("Status: Failed to save course");
+                statusLabel.setForeground(DANGER_COLOR);
             }
+
         } catch (NumberFormatException ex) {
             statusLabel.setText("Status: Please enter valid numbers for credits and max students");
+            statusLabel.setForeground(DANGER_COLOR);
+        } catch (Exception ex) {
+            statusLabel.setText("Status: Error saving course - " + ex.getMessage());
+            statusLabel.setForeground(DANGER_COLOR);
         }
     }
-    
-    private void deleteSelectedCourse() {
-        String selectedItem = coursesList.getSelectedItem();
-        if (selectedItem == null) {
-            statusLabel.setText("Status: Please select a course to delete");
-            return;
+
+    private void cancelEdit() {
+        cardLayout.show(mainPanel, MAIN_VIEW);
+    }
+
+    private void logout() {
+        int confirmation = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to logout?",
+            "Confirm Logout",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirmation == JOptionPane.YES_OPTION) {
+            this.dispose();
+            new CourseRegistrationSystem().setVisible(true);
         }
-        
-        String courseId = selectedItem.split(" - ")[0];
-        
-        // Simple confirmation dialog using AWT Dialog
-        Dialog confirmDialog = new Dialog(this, "Confirm Deletion", true);
-        confirmDialog.setLayout(new BorderLayout());
-        confirmDialog.add(new Label("Are you sure you want to delete course: " + courseId + "?", Label.CENTER), BorderLayout.CENTER);
-        
-        Panel buttonPanel = new Panel(new FlowLayout());
-        Button yesButton = new Button("Yes");
-        Button noButton = new Button("No");
-        
-        yesButton.addActionListener(e -> {
-            boolean success = courseManager.deleteCourse(courseId);
-            statusLabel.setText(success ? "Status: Course deleted successfully" : "Status: Failed to delete course");
-            if (success) {
-                refreshCoursesList();
-            }
-            confirmDialog.dispose();
-        });
-        
-        noButton.addActionListener(e -> confirmDialog.dispose());
-        
-        buttonPanel.add(yesButton);
-        buttonPanel.add(noButton);
-        confirmDialog.add(buttonPanel, BorderLayout.SOUTH);
-        
-        confirmDialog.setSize(300, 120);
-        confirmDialog.setLocationRelativeTo(this);
-        confirmDialog.setVisible(true);
-    }
-    
-    // Helper methods to create styled components
-    private TextField createStyledTextField(int columns) {
-        TextField field = new TextField(columns);
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        field.setBackground(Color.WHITE);
-        field.setForeground(TEXT_COLOR);
-        
-        // Add focus listener for better visual feedback
-        field.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                field.setBackground(INPUT_FOCUS_COLOR);
-            }
-            public void focusLost(FocusEvent e) {
-                field.setBackground(Color.WHITE);
-            }
-        });
-        
-        return field;
-    }
-    
-    private Button createStyledButton(String text, Color bgColor, Color textColor) {
-        Button button = new Button(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBackground(bgColor);
-        button.setForeground(textColor);
-        
-        // Add mouse listeners for hover effects (visual feedback)
-        button.addMouseListener(new MouseAdapter() {
-            Color originalColor = bgColor;
-            
-            public void mouseEntered(MouseEvent e) {
-                // Create darker shade for hover
-                int r = Math.max(0, originalColor.getRed() - 20);
-                int g = Math.max(0, originalColor.getGreen() - 20);
-                int b = Math.max(0, originalColor.getBlue() - 20);
-                button.setBackground(new Color(r, g, b));
-            }
-            
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(originalColor);
-            }
-            
-            public void mousePressed(MouseEvent e) {
-                // Even darker when pressed
-                int r = Math.max(0, originalColor.getRed() - 40);
-                int g = Math.max(0, originalColor.getGreen() - 40);
-                int b = Math.max(0, originalColor.getBlue() - 40);
-                button.setBackground(new Color(r, g, b));
-            }
-            
-            public void mouseReleased(MouseEvent e) {
-                // Back to hover color
-                int r = Math.max(0, originalColor.getRed() - 20);
-                int g = Math.max(0, originalColor.getGreen() - 20);
-                int b = Math.max(0, originalColor.getBlue() - 20);
-                button.setBackground(new Color(r, g, b));
-            }
-        });
-        
-        return button;
-    }
-    
-    private java.awt.List createStyledList(int rows) {
-        java.awt.List list = new java.awt.List(rows, false);
-        list.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        list.setBackground(Color.WHITE);
-        list.setForeground(TEXT_COLOR);
-        return list;
-    }
-    
-    private Label createStyledLabel(String text) {
-        Label label = new Label(text);
-        label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        label.setForeground(TEXT_COLOR);
-        return label;
-    }
-    
-    private TextArea createStyledTextArea(int rows, int cols) {
-        TextArea area = new TextArea(rows, cols);
-        area.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        area.setBackground(Color.WHITE);
-        area.setForeground(TEXT_COLOR);
-        return area;
-    }
-    
-    private Panel createStyledSectionPanel() {
-        Panel panel = new Panel(new BorderLayout());
-        panel.setBackground(CARD_COLOR);
-        return panel;
     }
 }
