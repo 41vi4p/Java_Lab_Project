@@ -1,0 +1,62 @@
+25PCC13EC11,Control Systems,3,Core,Dr. Kumar,60,0
+25PCC13EC12,Computer Networks,3,Core,Dr. Sharma,60,0
+25PCC13EC13,Artificial Intelligence,3,Core,Dr. Patel,60,0
+25PCC13EC14,Analysis of Algorithms,1,Core,Dr. Singh,60,0
+25PCC13EC15,Data Warehousing and Mining,2,Core,Dr. Gupta,60,0
+25PCC13EC16,VLSI Design,3,Core,Dr. Mehta,60,0
+25PCC13EC17,Analog and Digital Communication,3,Core,Dr. Verma,60,0
+25PCC13EC18,Machine Learning,1,Core,Dr. Joshi,60,0
+25PCC13EC19,C++ for VLSI,1,Core,Dr. Agarwal,60,0
+25PCC13EC20,System Security,1,Core,Dr. Mishra,60,0
+25PEC13ECXX,Program Elective Course,3,PEC,Dr. Reddy,40,0
+25PEC13EC1X,Program Elective Course,3,PEC,Dr. Nair,40,0
+25PEC13ECXX-L,Program Elective Lab,1,PEC,Dr. Iyer,40,0
+HIoTC501,IoT Sensor Technologies,4,Honours,Dr. Krishnan,30,0
+HIoTC601,IoT System Design,4,Honours,Dr. Pillai,30,0
+HIoTC701,Dynamic Paradigm in IoT,4,Honours,Dr. Menon,30,0
+HIoTSBL701,Interfacing & Programming with IoT Lab,4,Honours,Dr. Nambiar,20,0
+HIoTC801,Industrial IoT,4,Honours,Dr. Raghavan,30,0
+HAIMLC501,Mathematics for AI & ML,4,Honours,Dr. Subramanian,30,0
+HAIMLC601,Game Theory using AI & ML,4,Honours,Dr. Venkatesh,30,0
+HAIMLC701,AI & ML in Healthcare,4,Honours,Dr. Balasubramanian,30,0
+HAIMLSBL701,AI & ML in Healthcare: Lab,4,Honours,Dr. Srinivasan,20,0
+HAIMLC801,Text, Web and Social Media Analytics,4,Honours,Dr. Raman,30,0
+HDSCC501,Mathematics for Data Science,4,Honours,Dr. Natarajan,30,0
+HDSCC601,Statistical Learning for Data Science,4,Honours,Dr. Sundaram,30,0
+HDSCC701,Data Science for Health and Social Care,4,Honours,Dr. Parthasarathy,30,0
+HDSSBL701,Data Science for Health and Social Care Lab,4,Honours,Dr. Gopalakrishnan,20,0
+HDSCC801,Text, Web and Social Media Analytics,4,Honours,Dr. Jayaraman,30,0
+HBCCC501,Bit coin and Crypto currency,4,Honours,Dr. Kannan,30,0
+HBCCC601,Blockchain Platform,4,Honours,Dr. Murugan,30,0
+HBCCC701,Blockchain Development,4,Honours,Dr. Selvam,30,0
+HBCSBL701,Private Blockchain Setup Lab,4,Honours,Dr. Rajesh,20,0
+HBCCC801,DeFi (Decentralized Finance),4,Honours,Dr. Lakshmi,30,0
+HCSCC501,Ethical Hacking,4,Honours,Dr. Pradeep,30,0
+HCSCC601,Digital Forensic,4,Honours,Dr. Suresh,30,0
+HCSCC701,Security Information Management,4,Honours,Dr. Ramesh,30,0
+HCSSBL601,Vulnerability Assessment Penetration Testing Lab,4,Honours,Dr. Dinesh,20,0
+HCSCC801,Application Security,4,Honours,Dr. Mahesh,30,0
+PE-TA-BIL,Automation, Biomedical Instrumentation Laboratory,3,PEC,Dr. Vijay,25,0
+PE-TA-MC,Mobile Communication,3,PEC,Dr. Ajay,30,0
+PE-TA-DSP,Digital Signal Processing,3,PEC,Dr. Sanjay,30,0
+PE-TA-AVLSI,Analog VLSI Design,3,PEC,Dr. Rajeev,30,0
+PE-TA-IOT,IoT Laboratory,1,PEC,Dr. Deepak,20,0
+PE-TA-IPL,Image Processing Laboratory,1,PEC,Dr. Anand,20,0
+PE-TB-CRYPTO,Cryptography,3,PEC,Dr. Mohan,30,0
+PE-TB-AJP,Advanced Java Programming,3,PEC,Dr. Rohan,30,0
+PE-TB-NLP,Natural Language Processing,3,PEC,Dr. Sohan,30,0
+PE-TB-BDA,Big Data Analytics,3,PEC,Dr. Gihan,30,0
+PE-TB-AA,Advanced Algorithms,3,PEC,Dr. Kiran,30,0
+PE-TB-DLL,Deep Learning Laboratory,1,PEC,Dr. Sharan,20,0
+PE-TB-STQA,Software Testing & Quality Assurance Laboratory,1,PEC,Dr. Charan,20,0
+OE-DBMS,Database Management System,2,Open Elective,Dr. Prasad,50,0
+OE-SEWA,Software Engineering for Web Applications,2,Open Elective,Dr. Arun,50,0
+OE-OS,Operating Systems,2,Open Elective,Dr. Varun,50,0
+OE-CC,Cloud Computing,2,Open Elective,Dr. Tarun,50,0
+MDM-LFE,Law for Engineers,2,MDM,Dr. Advocate Sharma,40,0
+MDM-ETL,Emerging Technology and Law,2,MDM,Dr. Legal Expert,40,0
+MDM-HWP,Health, Wellness and Psychology,2,MDM,Dr. Psychologist,40,0
+MDM-ESI,Emotional and Spiritual Intelligence,2,MDM,Dr. Counselor,40,0
+MDM-PRCC,Public Relations and Corporate Communication,2,MDM,Dr. Communication,40,0
+MDM-POM,Principles of Management,2,MDM,Dr. MBA Faculty,40,0
+MDM-SWAYAM,From SWAYAM,2,MDM,SWAYAM Platform,100,0
